@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useEffect, useMemo, useState } from 'react';
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   API_BASE_URL,
   ApiError,
@@ -46,11 +46,6 @@ export default function HomePage() {
   const [healthMode, setHealthMode] = useState<HealthMode>('idle');
   const [healthText, setHealthText] = useState('Checking API...');
 
-  useEffect(() => {
-    void bootstrapSession();
-    void probeHealth();
-  }, []);
-
   const createdAtLabel = useMemo(() => {
     if (!session) {
       return '—';
@@ -64,7 +59,7 @@ export default function HomePage() {
     return parsed.toLocaleString('ru-RU');
   }, [session]);
 
-  async function probeHealth(): Promise<void> {
+  const probeHealth = useCallback(async (): Promise<void> => {
     try {
       const result = await getHealth();
       setHealthMode('ok');
@@ -73,9 +68,9 @@ export default function HomePage() {
       setHealthMode('error');
       setHealthText('API недоступен');
     }
-  }
+  }, []);
 
-  async function resolveSession(current: AuthSession): Promise<AuthSession | null> {
+  const resolveSession = useCallback(async (current: AuthSession): Promise<AuthSession | null> => {
     try {
       const user = await getMe(current.accessToken);
       return { ...current, user };
@@ -92,9 +87,9 @@ export default function HomePage() {
         user,
       };
     }
-  }
+  }, []);
 
-  async function bootstrapSession(): Promise<void> {
+  const bootstrapSession = useCallback(async (): Promise<void> => {
     const stored = readSession();
 
     if (!stored) {
@@ -114,7 +109,12 @@ export default function HomePage() {
     writeSession(resolved);
     setSession(resolved);
     setMode('authorized');
-  }
+  }, [resolveSession]);
+
+  useEffect(() => {
+    void bootstrapSession();
+    void probeHealth();
+  }, [bootstrapSession, probeHealth]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
