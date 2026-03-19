@@ -1,14 +1,16 @@
 # Lookforgrim Frontend
 
-Next.js frontend shell for the deployed backend API.
+Next.js MVP for searching makeup artists on a map.
 
 ## What is implemented
 
-- Login form connected to `POST /auth/login`
-- Persisted auth session in browser `localStorage`
-- Automatic refresh via `POST /auth/refresh` on `401`
-- Profile check via `GET /auth/me`
-- API health badge via `GET /health`
+- Main page with Yandex Maps integration
+- No auth and roles for MVP stage
+- Create new artist point by clicking on map
+- View and edit existing points in side panel
+- Local persistence in browser `localStorage`
+- Neumorphism visual style for the shell layout
+- Responsive map viewport for desktop and mobile
 
 ## Local start
 
@@ -20,15 +22,16 @@ Next.js frontend shell for the deployed backend API.
    ```bash
    cp .env.local.example .env.local
    ```
-3. Run dev server:
+3. Ensure `NEXT_PUBLIC_YANDEX_MAPS_API_KEY` is present in `.env.local` (example already contains the current key).
+4. Run dev server:
    ```bash
    npm run dev
    ```
-4. Open `http://localhost:3000`
+5. Open `http://localhost:3000`
 
 ## Environment variables
 
-- `NEXT_PUBLIC_API_BASE_URL` (default: `https://api.lookforgrim.online/v1`)
+- `NEXT_PUBLIC_YANDEX_MAPS_API_KEY`
 
 ## Production build
 

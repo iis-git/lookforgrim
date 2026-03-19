@@ -48,6 +48,9 @@ jobs:
             docker compose -f docker-compose.prod.yml up -d --build api
 
             cd /opt/lookforgrim/frontend
+            cat > .env.local <<'ENVEOF'
+            NEXT_PUBLIC_YANDEX_MAPS_API_KEY=ed792bc6-fd33-414a-91f2-58a64b6677dd
+            ENVEOF
             npm ci
             npm run build
 

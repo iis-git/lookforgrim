@@ -14,8 +14,8 @@ const titleFont = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: 'Lookforgrim Frontend',
-  description: 'Admin login shell for Lookforgrim API',
+  title: 'Lookforgrim — карта гримеров',
+  description: 'MVP интерфейс поиска гримеров на карте Яндекс Карт',
 };
 
 export default function RootLayout({
