@@ -1,0 +1,60 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Sync backend to VPS
+        run: |
+          rsync -az --delete \
+            --exclude ".env" \
+            --exclude ".env.production" \
+            --exclude "node_modules" \
+            --exclude "dist" \
+            --exclude "uploads" \
+            ./backend/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/lookforgrim/backend/"
+
+      - name: Sync frontend to VPS
+        run: |
+          rsync -az --delete \
+            --exclude ".env.local" \
+            --exclude "node_modules" \
+            --exclude ".next" \
+            ./frontend/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/lookforgrim/frontend/"
+
+      - name: Build and restart services on VPS
+        run: |
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" <<'EOF'
+            set -euo pipefail
+
+            cd /opt/lookforgrim/backend
+            docker compose -f docker-compose.prod.yml up -d --build api
+
+            cd /opt/lookforgrim/frontend
+            npm ci
+            npm run build
+
+            systemctl restart lookforgrim-frontend
+            systemctl reload nginx
+          EOF
+
+      - name: Health checks
+        run: |
+          curl --fail --silent --show-error https://api.lookforgrim.online/v1/health > /dev/null
+          curl --fail --silent --show-error https://lookforgrim.online > /dev/null
