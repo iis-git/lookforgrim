@@ -1,6 +1,7 @@
 'use client';
 
 import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import styles from './page.module.scss';
 
 type Coordinates = [number, number];
 type MapLoadStatus = 'loading' | 'ready' | 'error';
@@ -86,18 +87,6 @@ function createYandexMapsScriptSrc(): string {
   const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY || DEFAULT_YANDEX_MAPS_API_KEY;
   const baseUrl = 'https://api-maps.yandex.ru/2.1/?lang=ru_RU';
   return `${baseUrl}&apikey=${encodeURIComponent(apiKey)}`;
-}
-
-function mapStatusLabel(status: MapLoadStatus): string {
-  if (status === 'ready') {
-    return 'Карта готова. Кликни по карте для новой точки.';
-  }
-
-  if (status === 'error') {
-    return 'Ошибка загрузки карты. Проверь API-ключ Yandex Maps.';
-  }
-
-  return 'Загрузка карты...';
 }
 
 function createArtistId(): string {
@@ -475,58 +464,54 @@ export default function HomePage() {
   }, [artists, activeArtistId, mapStatus]);
 
   return (
-    <main className="map-page">
-      <div className="glow glow--top" aria-hidden="true" />
-      <div className="glow glow--bottom" aria-hidden="true" />
+    <main className={styles.mapPage}>
+      <div className={`${styles.glow} ${styles.glowTop}`} aria-hidden="true" />
+      <div className={`${styles.glow} ${styles.glowBottom}`} aria-hidden="true" />
 
-      <section className="map-shell">
-        <div className="map-heading">
-          <p className="brand">Lookforgrim</p>
-          <h1>Карта гримеров</h1>
-          <p className="subtitle">
-            MVP без авторизации: карта, список, добавление и редактирование точек. Фильтры добавим следующим шагом.
-          </p>
+      <section className={styles.mapShell}>
+        <div className={styles.mapHeading}>
+          <h1 className={styles.brand}>Lookforgrim</h1>
         </div>
 
-        <div className="map-grid">
-          <div className="map-frame">
-            <div ref={mapContainerRef} className="map-canvas" />
-            <p className={`map-status map-status--${mapStatus}`}>{mapStatusLabel(mapStatus)}</p>
+        <div className={styles.mapGrid}>
+          <div className={styles.mapFrame}>
+            <div ref={mapContainerRef} className={styles.mapCanvas} />
           </div>
 
-          <aside className="control-panel">
-            <div className="panel-head">
-              <p className="panel-title">Гримеры</p>
-              <span className="panel-count">{artists.length}</span>
+          <aside className={styles.controlPanel}>
+            <div className={styles.panelHead}>
+              <p className={styles.panelTitle}>Гримеры</p>
+              <span className={styles.panelCount}>{artists.length}</span>
             </div>
 
-            <p className="panel-hint">{hintText}</p>
+            <p className={styles.panelHint}>{hintText}</p>
 
-            <div className="point-list">
+            <div className={styles.pointList}>
               {artists.length === 0 ? (
-                <p className="empty-state">Пока нет точек. Кликни по карте, чтобы создать первую.</p>
+                <p className={styles.emptyState}>Пока нет точек. Кликни по карте, чтобы создать первую.</p>
               ) : (
                 artists.map((artist) => (
                   <button
                     key={artist.id}
                     type="button"
-                    className={`point-card ${activeArtistId === artist.id ? 'point-card--active' : ''}`}
+                    className={`${styles.pointCard} ${activeArtistId === artist.id ? styles.pointCardActive : ''}`.trim()}
                     onClick={() => selectArtistForEditing(artist)}
                   >
-                    <strong>{artist.name || 'Без имени'}</strong>
-                    <span>{artist.phone || 'Телефон не указан'}</span>
-                    <span>{formatCoordinates(artist.coordinates)}</span>
+                    <strong className={styles.pointCardName}>{artist.name || 'Без имени'}</strong>
+                    <span className={styles.pointCardMeta}>{artist.phone || 'Телефон не указан'}</span>
+                    <span className={styles.pointCardMeta}>{formatCoordinates(artist.coordinates)}</span>
                   </button>
                 ))
               )}
             </div>
 
-            <form className="editor-form" onSubmit={saveArtist}>
-              <p className="editor-title">{editorMode === 'edit' ? 'Редактирование точки' : 'Новая точка'}</p>
+            <form className={styles.editorForm} onSubmit={saveArtist}>
+              <p className={styles.editorTitle}>{editorMode === 'edit' ? 'Редактирование точки' : 'Новая точка'}</p>
 
-              <label className="field">
-                <span>Имя гримера</span>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>Имя гримера</span>
                 <input
+                  className={styles.fieldInput}
                   type="text"
                   value={draft.name}
                   onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
@@ -535,9 +520,10 @@ export default function HomePage() {
                 />
               </label>
 
-              <label className="field">
-                <span>Телефон</span>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>Телефон</span>
                 <input
+                  className={styles.fieldInput}
                   type="text"
                   value={draft.phone}
                   onChange={(event) => setDraft((current) => ({ ...current, phone: event.target.value }))}
@@ -545,9 +531,10 @@ export default function HomePage() {
                 />
               </label>
 
-              <label className="field">
-                <span>Координаты</span>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>Координаты</span>
                 <input
+                  className={styles.fieldInput}
                   type="text"
                   value={draft.coordinates ? formatCoordinates(draft.coordinates) : ''}
                   placeholder="Кликни по карте для выбора"
@@ -555,9 +542,10 @@ export default function HomePage() {
                 />
               </label>
 
-              <label className="field">
-                <span>Комментарий</span>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>Комментарий</span>
                 <textarea
+                  className={styles.fieldTextarea}
                   rows={3}
                   value={draft.notes}
                   onChange={(event) => setDraft((current) => ({ ...current, notes: event.target.value }))}
@@ -565,13 +553,13 @@ export default function HomePage() {
                 />
               </label>
 
-              {activeArtistUpdatedAt ? <p className="editor-meta">Обновлено: {activeArtistUpdatedAt}</p> : null}
+              {activeArtistUpdatedAt ? <p className={styles.editorMeta}>Обновлено: {activeArtistUpdatedAt}</p> : null}
 
-              <div className="editor-actions">
-                <button className="btn btn--primary" type="submit" disabled={!canSave}>
+              <div className={styles.editorActions}>
+                <button className={`${styles.button} ${styles.buttonPrimary}`} type="submit" disabled={!canSave}>
                   {editorMode === 'edit' ? 'Сохранить изменения' : 'Добавить точку'}
                 </button>
-                <button className="btn btn--ghost" type="button" onClick={prepareNewPointMode}>
+                <button className={`${styles.button} ${styles.buttonGhost}`} type="button" onClick={prepareNewPointMode}>
                   Новая точка
                 </button>
               </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Manrope } from 'next/font/google';
-import './globals.css';
+import './globals.scss';
+import styles from './layout.module.scss';
 
 const bodyFont = Manrope({
   subsets: ['latin', 'cyrillic'],
@@ -25,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body className={`${bodyFont.variable} ${titleFont.variable}`}>{children}</body>
+      <body className={`${bodyFont.variable} ${titleFont.variable} ${styles.body}`}>{children}</body>
     </html>
   );
 }
