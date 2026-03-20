@@ -28,7 +28,7 @@ type UseYandexMapResult = {
   mapStatus: MapLoadStatus;
 };
 
-const DEFAULT_CENTER: Coordinates = [55.751244, 37.618423];
+const DEFAULT_CENTER: Coordinates = [59.938784, 30.314997];
 const DEFAULT_ZOOM = 10;
 
 const clearPlacemarks = (map: YMapInstance | null, placemarkRefs: PlacemarkRef[]): void => {
