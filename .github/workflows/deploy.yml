@@ -51,6 +51,7 @@ jobs:
             cat > .env.local <<'ENVEOF'
             NEXT_PUBLIC_YANDEX_MAPS_API_KEY=ed792bc6-fd33-414a-91f2-58a64b6677dd
             ENVEOF
+            rm -rf .next
             npm ci
             npm run build
 
@@ -60,8 +61,21 @@ jobs:
 
       - name: Health checks
         run: |
+          set -euo pipefail
+
           curl --fail --silent --show-error --retry 20 --retry-delay 3 --retry-connrefused https://api.lookforgrim.online/v1/health > /dev/null
-          curl --fail --silent --show-error --retry 20 --retry-delay 3 --retry-connrefused https://lookforgrim.online > /dev/null
+
+          frontend_html="$(curl --fail --silent --show-error --retry 20 --retry-delay 3 --retry-connrefused https://lookforgrim.online)"
+
+          if ! echo "$frontend_html" | grep -q 'class="map-page"'; then
+            echo "Expected map page marker not found in production response."
+            exit 1
+          fi
+
+          if echo "$frontend_html" | grep -q 'class="page-shell"'; then
+            echo "Unexpected old login shell page detected in production response."
+            exit 1
+          fi
 
       - name: Diagnostics on failure
         if: failure()
