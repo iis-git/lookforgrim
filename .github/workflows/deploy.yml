@@ -45,7 +45,7 @@ jobs:
             set -euo pipefail
 
             cd /opt/lookforgrim/backend
-            docker compose -f docker-compose.prod.yml up -d --build api
+            docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build db api
 
             cd /opt/lookforgrim/frontend
             cat > .env.local <<'ENVEOF'
@@ -60,5 +60,32 @@ jobs:
 
       - name: Health checks
         run: |
-          curl --fail --silent --show-error https://api.lookforgrim.online/v1/health > /dev/null
-          curl --fail --silent --show-error https://lookforgrim.online > /dev/null
+          curl --fail --silent --show-error --retry 20 --retry-delay 3 --retry-connrefused https://api.lookforgrim.online/v1/health > /dev/null
+          curl --fail --silent --show-error --retry 20 --retry-delay 3 --retry-connrefused https://lookforgrim.online > /dev/null
+
+      - name: Diagnostics on failure
+        if: failure()
+        continue-on-error: true
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" <<'EOF'
+            set -euo pipefail
+
+            echo "===== Docker compose status ====="
+            cd /opt/lookforgrim/backend
+            docker compose --env-file .env.production -f docker-compose.prod.yml ps || true
+
+            echo "===== API logs (tail 200) ====="
+            docker compose --env-file .env.production -f docker-compose.prod.yml logs --tail=200 api || true
+
+            echo "===== Frontend service status ====="
+            systemctl status lookforgrim-frontend --no-pager -l || true
+
+            echo "===== Frontend journal (tail 200) ====="
+            journalctl -u lookforgrim-frontend -n 200 --no-pager || true
+
+            echo "===== Nginx status ====="
+            systemctl status nginx --no-pager -l || true
+
+            echo "===== Nginx error log (tail 200) ====="
+            tail -n 200 /var/log/nginx/error.log || true
+          EOF
