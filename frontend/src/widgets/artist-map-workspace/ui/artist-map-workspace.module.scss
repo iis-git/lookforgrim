@@ -85,6 +85,24 @@
   background: linear-gradient(145deg, #d4dce7, #eef3fa);
 }
 
+.mapStatus {
+  margin: 0;
+  padding: 0.62rem 0.7rem;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow: var(--neo-in);
+}
+
+.mapStatusLoading,
+.mapStatusReady {
+  color: var(--text-muted);
+}
+
+.mapStatusError {
+  color: var(--danger);
+}
+
 .controlPanel {
   border-radius: 22px;
   padding: 0.9rem;

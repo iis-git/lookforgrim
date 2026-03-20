@@ -15,6 +15,7 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
+      "@/pages/*": ["./src/_pages/*"],
       "@/*": ["./src/*"]
     },
     "plugins": [{ "name": "next" }]

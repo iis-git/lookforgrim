@@ -17,7 +17,7 @@ export class ApiError extends Error {
   }
 }
 
-function extractMessage(payload: unknown, fallback: string): string {
+const extractMessage = (payload: unknown, fallback: string): string => {
   if (!payload || typeof payload !== 'object') {
     return fallback;
   }
@@ -33,9 +33,9 @@ function extractMessage(payload: unknown, fallback: string): string {
   }
 
   return fallback;
-}
+};
 
-async function parseResponseBody(response: Response): Promise<unknown> {
+const parseResponseBody = async (response: Response): Promise<unknown> => {
   const raw = await response.text();
 
   if (!raw) {
@@ -47,13 +47,13 @@ async function parseResponseBody(response: Response): Promise<unknown> {
   } catch {
     return raw;
   }
-}
+};
 
-async function request<T>(
+const request = async <T>(
   path: string,
   options: RequestInit,
   accessToken?: string,
-): Promise<T> {
+): Promise<T> => {
   const headers = new Headers(options.headers);
 
   if (options.body && !headers.has('Content-Type')) {
@@ -81,26 +81,20 @@ async function request<T>(
   }
 
   return body as T;
-}
+};
 
-export function getHealth(): Promise<{ status: string; timestamp: string }> {
-  return request('/health', { method: 'GET' });
-}
+export const getHealth = (): Promise<{ status: string; timestamp: string }> => request('/health', { method: 'GET' });
 
-export function login(email: string, password: string): Promise<LoginResponse> {
-  return request('/auth/login', {
+export const login = (email: string, password: string): Promise<LoginResponse> =>
+  request('/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });
-}
 
-export function refreshTokens(refreshToken: string): Promise<TokenPair> {
-  return request('/auth/refresh', {
+export const refreshTokens = (refreshToken: string): Promise<TokenPair> =>
+  request('/auth/refresh', {
     method: 'POST',
     body: JSON.stringify({ refreshToken }),
   });
-}
 
-export function getMe(accessToken: string): Promise<PublicUser> {
-  return request('/auth/me', { method: 'GET' }, accessToken);
-}
+export const getMe = (accessToken: string): Promise<PublicUser> => request('/auth/me', { method: 'GET' }, accessToken);

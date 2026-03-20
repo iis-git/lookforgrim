@@ -19,14 +19,16 @@ export const metadata: Metadata = {
   description: 'MVP интерфейс поиска гримеров на карте Яндекс Карт',
 };
 
-export default function RootLayout({
+const RootLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>): JSX.Element => {
   return (
     <html lang="ru">
       <body className={`${bodyFont.variable} ${titleFont.variable} ${styles.body}`}>{children}</body>
     </html>
   );
-}
+};
+
+export default RootLayout;
